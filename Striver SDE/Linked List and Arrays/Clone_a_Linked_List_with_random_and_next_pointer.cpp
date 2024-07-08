@@ -1,29 +1,39 @@
-//Optimized Approach - O(n^2 logn + nlogn) - o(n^2 logn) time and O(n) space
 class Solution {
 public:
-    vector<vector<int>> threeSum(vector<int>& nums) {
-        int target = 0;
-        sort(nums.begin(), nums.end());
-        set<vector<int>> s;
-        vector<vector<int>> output;
-        for (int i = 0; i < nums.size(); i++){
-            int j = i + 1;
-            int k = nums.size() - 1;
-            while (j < k) {
-                int sum = nums[i] + nums[j] + nums[k];
-                if (sum == target) {
-                    s.insert({nums[i], nums[j], nums[k]});
-                    j++;
-                    k--;
-                } else if (sum < target) {
-                    j++;
-                } else {
-                    k--;
-                }
-            }
+    Node* copyRandomList(Node* head) {
+        if (head == nullptr) return nullptr;
+
+        // Step 1: Create new nodes interweaved with original nodes.
+        Node* curr = head;
+        while (curr) {
+            Node* newNode = new Node(curr->val);
+            newNode->next = curr->next;
+            curr->next = newNode;
+            curr = newNode->next;
         }
-        for(auto triplets : s)
-            output.push_back(triplets);
-        return output;
+
+        // Step 2: Assign random pointers for the new nodes.
+        curr = head;
+        while (curr) {
+            if (curr->random) {
+                curr->next->random = curr->random->next;
+            }
+            curr = curr->next->next;
+        }
+
+        // Step 3: Separate the new nodes to form the deep copied list.
+        curr = head;
+        Node* newHead = head->next;
+        Node* temp;
+        while (curr) {
+            temp = curr->next;
+            curr->next = temp->next;
+            if (temp->next) {
+                temp->next = temp->next->next;
+            }
+            curr = curr->next;
+        }
+
+        return newHead;
     }
 };
