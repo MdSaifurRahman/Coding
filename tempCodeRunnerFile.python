@@ -1,0 +1,61 @@
+def solution(n, edgeList):
+    from collections import defaultdict, deque
+    
+    # Build the adjacency list
+    tree = defaultdict(list)
+    for u, v in edgeList:
+        tree[u].append(v)
+        tree[v].append(u)
+    
+    # BFS to calculate distances from the root (node 1)
+    def bfs(root):
+        distance = [-1] * (n + 1)
+        queue = deque([root])
+        distance[root] = 0
+        while queue:
+            node = queue.popleft()
+            for neighbor in tree[node]:
+                if distance[neighbor] == -1:
+                    distance[neighbor] = distance[node] + 1
+                    queue.append(neighbor)
+        return distance
+
+    distances = bfs(1)
+    
+    # Sort nodes by their distance from the root in descending order
+    nodes_by_distance = sorted(range(1, n + 1), key=lambda x: distances[x], reverse=True)
+    
+    # Set to track cursed nodes
+    cursed = set([1])
+    removed = set()
+    
+    # Function to spread curse
+    def spread_curse():
+        new_cursed = set()
+        for node in cursed:
+            for neighbor in tree[node]:
+                if neighbor not in cursed and neighbor not in removed:
+                    new_cursed.add(neighbor)
+        cursed.update(new_cursed)
+    
+    # Try to remove nodes in order of their distance from the root
+    for node in nodes_by_distance:
+        if node in cursed or node in removed:
+            continue
+        # Remove the node
+        removed.add(node)
+        # Spread the curse after each removal
+        spread_curse()
+    
+    # Calculate the number of saved nodes
+    saved_nodes = n - len(cursed)
+    return saved_nodes
+
+# Example usage
+n = 4
+edgeList = [[1, 2], [2, 3], [2, 4]]
+print("Maximum nodes saved:", solution(n, edgeList))  # Output should be 2
+
+n = 2
+edgeList = [[1, 2]]
+print("Maximum nodes saved:", solution(n, edgeList))  # Output should be 0
